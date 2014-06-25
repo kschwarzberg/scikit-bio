@@ -22,7 +22,6 @@ API Reference
    draw.distributions
    format.sequences
    math.diversity.alpha
-   math.diversity.beta
    math.stats.distance
    math.stats.misc
    math.stats.ordination
@@ -45,5 +44,4 @@ to scikit-bio.
    :maxdepth: 1
 
    development/py3
-   development/coding_guidelines
    development/new_module

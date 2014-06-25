@@ -1230,7 +1230,7 @@ class NucleotideSequence(BiologicalSequence):
 
     See Also
     --------
-    BiologicalSequence
+    BiologialSequence
 
     Notes
     -----
@@ -1566,7 +1566,7 @@ class ProteinSequence(BiologicalSequence):
 
     See Also
     --------
-    BiologicalSequence
+    BiologialSequence
 
     Notes
     -----

@@ -47,6 +47,7 @@ class FileData(object):
 
 class ParseFastqTests(object):
     def test_parse(self):
+        """sequence and info objects should correctly match"""
         for label, seq, qual in parse_fastq(self.FASTQ_EXAMPLE,
                                             phred_offset=64):
             self.assertTrue(label in DATA)
@@ -69,15 +70,12 @@ class ParseFastqTests(object):
             list(parse_fastq(self.FASTQ_EXAMPLE, phred_offset=33))
 
     def test_parse_error(self):
+        """Does this raise a FastqParseError with incorrect input?"""
         with self.assertRaises(FastqParseError):
             list(parse_fastq(self.FASTQ_EXAMPLE_2, strict=True))
 
         with self.assertRaises(FastqParseError):
             list(parse_fastq(self.FASTQ_EXAMPLE_3, phred_offset=64))
-
-    def test_invalid_phred_offset(self):
-        with self.assertRaises(ValueError):
-            list(parse_fastq(self.FASTQ_EXAMPLE, phred_offset=42))
 
 
 class ParseFastqTestsInputIsIterable(IterableData, ParseFastqTests, TestCase):

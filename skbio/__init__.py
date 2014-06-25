@@ -61,7 +61,7 @@ from skbio.core.sequence import (
     Protein, ProteinSequence)
 from skbio.core.distance import DistanceMatrix
 from skbio.core.alignment import (
-    local_pairwise_align_ssw, SequenceCollection, Alignment)
+    align_striped_smith_waterman, SequenceCollection, Alignment)
 from skbio.core.tree import (
     TreeNode, nj)
 from skbio.parse.sequences import (
@@ -70,7 +70,7 @@ from skbio.parse.sequences import (
 
 __all__ = ['BiologicalSequence', 'NucleotideSequence', 'DNA', 'DNASequence',
            'RNA', 'RNASequence', 'Protein', 'ProteinSequence',
-           'DistanceMatrix', 'local_pairwise_align_ssw',
+           'DistanceMatrix', 'align_striped_smith_waterman',
            'SequenceCollection', 'Alignment', 'TreeNode', 'nj', 'parse_fasta',
            'parse_fastq', 'parse_qual', 'FastaIterator', 'FastqIterator',
            'SequenceIterator']

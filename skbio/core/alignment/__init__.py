@@ -20,28 +20,15 @@ Data Structures
    SequenceCollection
    Alignment
 
-Optimized (i.e., production-ready) Alignment Algorithms
--------------------------------------------------------
+Alignment Algorithms
+--------------------
 
 .. autosummary::
    :toctree: generated/
 
    StripedSmithWaterman
    AlignmentStructure
-   local_pairwise_align_ssw
-
-Slow (i.e., educational-purposes only) Alignment Algorithms
------------------------------------------------------------
-
-.. autosummary::
-   :toctree: generated/
-
-   pairwise.global_pairwise_align_nucleotide
-   pairwise.global_pairwise_align_protein
-   pairwise.global_pairwise_align
-   pairwise.local_pairwise_align_nucleotide
-   pairwise.local_pairwise_align_protein
-   pairwise.local_pairwise_align
+   align_striped_smith_waterman
 
 Data Structure Examples
 -----------------------
@@ -69,22 +56,28 @@ Data Structure Examples
 >>> s1
 <SequenceCollection: n=2; mean +/- std length=26.50 +/- 1.50>
 
+Alignment Algorithm Examples
+----------------------------
+Using the convenient ``align_striped_smith_waterman`` function:
 
-Optimized Alignment Algorithm Examples
---------------------------------------
-Using the convenient ``local_pairwise_align_ssw`` function:
-
->>> from skbio.core.alignment import local_pairwise_align_ssw
->>> alignment = local_pairwise_align_ssw(
+>>> from skbio.core.alignment import align_striped_smith_waterman
+>>> alignment = align_striped_smith_waterman(
 ...                 "ACTAAGGCTCTCTACCCCTCTCAGAGA",
 ...                 "ACTAAGGCTCCTAACCCCCTTTTCTCAGA"
 ...             )
 >>> print alignment
->query
-ACTAAGGCTCTC-TACCC----CTCTCAGA
->target
-ACTAAGGCTC-CTAACCCCCTTTTCTCAGA
-<BLANKLINE>
+{
+    'optimal_alignment_score': 27,
+    'suboptimal_alignment_score': 21,
+    'query_begin': 0,
+    'query_end': 24,
+    'target_begin': 0,
+    'target_end_optimal': 28,
+    'target_end_suboptimal': 12,
+    'cigar': '10M1I2M1D5M4D7M',
+    'query_sequence': 'ACTAAGGCTCTCTACCCCTCTCAGAGA',
+    'target_sequence': 'ACTAAGGCTCCTAACCCCCTTTTCTCAGA'
+}
 
 Using the ``StripedSmithWaterman`` object:
 
@@ -92,10 +85,18 @@ Using the ``StripedSmithWaterman`` object:
 >>> query = StripedSmithWaterman("ACTAAGGCTCTCTACCCCTCTCAGAGA")
 >>> alignment = query("AAAAAACTCTCTAAACTCACTAAGGCTCTCTACCCCTCTTCAGAGAAGTCGA")
 >>> print alignment
-ACTAAGGCTC...
-ACTAAGGCTC...
-Score: 49
-Length: 28
+{
+    'optimal_alignment_score': 49,
+    'suboptimal_alignment_score': 24,
+    'query_begin': 0,
+    'query_end': 26,
+    'target_begin': 18,
+    'target_end_optimal': 45,
+    'target_end_suboptimal': 29,
+    'cigar': '20M1D7M',
+    'query_sequence': 'ACTAAGGCTCTCTACCCCTCTCAGAGA',
+    'target_sequence': 'AAAAAACTCTCTAAACTCACTAAGGCTCTCTACCCCTCTTCAGAGAAGTCGA'
+}
 
 Using the ``StripedSmithWaterman`` object for multiple targets in an efficient
 way and finding the aligned sequence representations:
@@ -115,69 +116,22 @@ way and finding the aligned sequence representations:
 ...     alignments.append(alignment)
 ...
 >>> print alignments[0]
-ACTAAGGCT-...
-ACT-AGGCTC...
-Score: 38
-Length: 30
->>> print alignments[0].aligned_query_sequence
+{
+    'optimal_alignment_score': 38,
+    'suboptimal_alignment_score': 14,
+    'query_begin': 0,
+    'query_end': 26,
+    'target_begin': 4,
+    'target_end_optimal': 32,
+    'target_end_suboptimal': 15,
+    'cigar': '3M1I6M3D17M',
+    'query_sequence': 'ACTAAGGCTCTCTACCCCTCTCAGAGA',
+    'target_sequence': 'GCTAACTAGGCTCCCTTCTACCCCTCTCAGAGA'
+}
+>>> print alignments[0].get_aligned_query_sequence()
 ACTAAGGCT---CTCTACCCCTCTCAGAGA
->>> print alignments[0].aligned_target_sequence
+>>> print alignments[0].get_aligned_target_sequence()
 ACT-AGGCTCCCTTCTACCCCTCTCAGAGA
-
-Slow Alignment Algorithm Examples
----------------------------------
-scikit-bio also provides pure-Python implementations of Smith-Waterman and
-Needleman-Wunsch alignment. These are much slower than the methods described
-above, but serve as useful educational examples as they're simpler to
-experiment with. Functions are provided for local and global alignment of
-protein and nucleotide sequences. The ``global*`` and ``local*`` functions
-differ in the underlying algorithm that is applied (``global*`` uses Needleman-
-Wunsch while ``local*`` uses Smith-Waterman), and ``*protein`` and
-``*nucleotide`` differ in their default scoring of matches, mismatches, and
-gaps.
-
-Here we locally align a pair of protein sequences using gap open penalty
-of 11 and a gap extend penalty of 1 (in other words, it is much more
-costly to open a new gap than extend an existing one).
-
->>> from skbio.core.alignment.pairwise import local_pairwise_align_protein
->>> s1 = "HEAGAWGHEE"
->>> s2 = "PAWHEAE"
->>> r = local_pairwise_align_protein(s1, s2, 11, 1)
-
-This returns an ``skbio.Alignment`` object. We can look at the aligned
-sequences:
-
->>> print(str(r[0]))
-AWGHE
->>> print(str(r[1]))
-AW-HE
-
-We can identify the start and end positions of each aligned sequence
-as follows:
-
->>> r.start_end_positions()
-[(4, 8), (1, 4)]
-
-And we can view the score of the alignment using the ``score`` method:
-
->>> r.score()
-25.0
-
-Similarly, we can perform global alignment of nucleotide sequences, and print
-the resulting alignment as fasta records:
-
->>> from skbio.core.alignment.pairwise import global_pairwise_align_nucleotide
->>> s1 = "GCGTGCCTAAGGTATGCAAG"
->>> s2 = "ACGTGCCTAGGTACGCAAG"
->>> r = global_pairwise_align_nucleotide(s1, s2)
->>> print(r.to_fasta())
->0
-GCGTGCCTAAGGTATGCAAG
->1
-ACGTGCCTA-GGTACGCAAG
-<BLANKLINE>
-
 
 """
 
@@ -191,10 +145,10 @@ ACGTGCCTA-GGTACGCAAG
 
 from .alignment import Alignment, SequenceCollection
 from .ssw.ssw_wrapper import (
-    StripedSmithWaterman, local_pairwise_align_ssw, AlignmentStructure)
+    StripedSmithWaterman, AlignmentStructure, align_striped_smith_waterman)
 
 __all__ = ['Alignment', 'SequenceCollection', 'StripedSmithWaterman',
-           'AlignmentStructure', 'local_pairwise_align_ssw']
+           'AlignmentStructure', 'align_striped_smith_waterman']
 
 from numpy.testing import Tester
 test = Tester().test
